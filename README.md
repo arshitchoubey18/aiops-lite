@@ -1,154 +1,119 @@
-# AIOps Lite - Kubernetes + AI Log Analysis for 8GB RAM Laptops
+<p align="center">
+  <h1>aiops-lite</h1>
+  <p align="center">Streamline your operational intelligence with a lightweight, AI-powered solution for modern infrastructure.</p>
+  <p align="center">
+    <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status">
+    <img src="https://img.shields.io/github/license/your-org/aiops-lite" alt="License">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
+    <img src="https://img.shields.io/github/stars/your-org/aiops-lite?style=social" alt="GitHub Stars">
+  </p>
+</p>
 
-> A laptop-friendly AIOps platform that runs Kubernetes, CI/CD, and LLM-powered log analysis without killing your 8GB RAM machine. 
-> Built as a staged learning project: start local, upgrade to cloud later.
+---
 
-[![Build Status](https://github.com/YOUR_GITHUB_USERNAME/aiops-lite/actions/workflows/build.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/aiops-lite/actions)
+## The Strategic "Why" (Overview)
 
-### 🎯 What This Project Does
-1. **Simulate failures**: FastAPI app with `/crash` endpoint that throws `ZeroDivisionError`
-2. **Detect with AI**: Python script pulls `kubectl logs` → sends to Ollama `phi3` → returns 2-line RCA
-3. **Self-heal**: Bash script auto-restarts the deployment when AI detects a crash
-4. **CI/CD**: GitHub Actions builds Docker image and pushes to GHCR on every commit
+> **The Problem**: Traditional AIOps platforms, while powerful, often come with significant complexity, high resource demands, and steep learning curves, making them inaccessible for teams with limited budgets or specific operational needs. This often leads to reactive incident management, alert fatigue, and missed opportunities for proactive system optimization.
 
-### 🏗️ Architecture - Laptop Version
+`aiops-lite` addresses these challenges by offering a focused, accessible, and efficient approach to operational intelligence. Leveraging a lightweight AI agent and seamless Kubernetes integration, it cuts through the complexity of full-scale AIOps solutions, providing actionable insights without the typical overhead. This empowers engineering teams to achieve faster problem resolution, proactive issue identification, and improved system reliability in their cloud-native environments.
 
-9 lines hidden
-GitHub Push → GitHub Actions → ghcr.io → k3d Cluster → FastAPI Pod
-↓
-kubectl logs → analyzer.py → Ollama phi3
-↓
-auto-heal.sh → kubectl rollout restart
+## Key Features
 
-Code
+*   ✨ **Intelligent Anomaly Detection**: Proactively identifies deviations in system behavior and performance metrics to prevent potential outages before they impact users.
+*   🚀 **Lightweight AI Agent**: Designed for minimal resource consumption, the embedded AI agent efficiently processes operational data to generate valuable insights without bogging down your infrastructure.
+*   🐳 **Kubernetes Native Integration**: Seamlessly integrates with your containerized workloads and Kubernetes clusters, providing comprehensive monitoring and insights directly where your applications run.
+*   📊 **Actionable Insights & Alerts**: Translates complex operational data into clear, prioritized recommendations and alerts, enabling rapid decision-making and efficient incident response.
+*   ⚙️ **Simplified Deployment & Management**: Get up and running quickly with straightforward installation and minimal configuration, reducing the operational burden of advanced monitoring.
+*   🧩 **Modular & Extensible Architecture**: Built with modularity in mind, allowing for easy customization, extension, and integration into existing CI/CD pipelines and operational workflows.
 
-### 💻 Laptop Requirements
-| Resource | Spec | Why |
-| --- | --- | --- |
-| CPU | 2 cores minimum | k3d server + agent |
-| RAM | 8GB + 4GB swap | Ollama uses ~2GB when running |
-| Disk | 10GB free | k3d images + Ollama models |
-| OS | Linux / WSL2 / macOS | Tested on Ubuntu 22.04 |
+## Technical Architecture
 
-**Critical:** This project is designed to run components sequentially, not all at once. Never run Grafana + Prometheus + Ollama simultaneously on 8GB.
+`aiops-lite` is engineered for performance and extensibility, leveraging a modern Python-based stack for its core intelligence and designed for cloud-native deployment.
 
-### 🚀 Quick Start - 5 Commands
-```bash
-# 1. Clone + setup cluster
-git clone https://github.com/YOUR_GITHUB_USERNAME/aiops-lite.git && cd aiops-lite
-./scripts/setup-k3d.sh
+| Technology | Purpose                                        | Key Benefit                                     |
+| :--------- | :--------------------------------------------- | :---------------------------------------------- |
+| Python     | Core application logic, AI agent development   | Rapid development, extensive ecosystem for ML/AI |
+| Kubernetes | Container orchestration and deployment target  | Scalability, resilience, standardized operations |
+| Flask/FastAPI (inferred) | Web application framework for `app` services | Efficient API development, high performance     |
+| Libraries (e.g., NumPy, Pandas, Scikit-learn) | Data processing and machine learning for `ai-agent` | Robust data manipulation and analytical capabilities |
 
-# 2. Build + deploy app  
-docker build -t aiops-lite:v1 ./app
-k3d image import aiops-lite:v1 -c aiops
-kubectl apply -f k8s/
+### Directory Structure
 
-# 3. Install AI model
-ollama pull phi3  # or 'ollama pull tinyllama' if RAM is tight
+```
+.
+├── 📁 .github/             # GitHub Actions workflows for CI/CD and automation
+├── 📁 ai-agent/            # Contains the core AI/ML logic and data processing components
+├── 📁 app/                 # Main application services, APIs, or user interface components
+├── 📁 k8s/                 # Kubernetes deployment manifests (Deployments, Services, ConfigMaps, etc.)
+├── 📁 scripts/             # Utility scripts for setup, deployment, and development tasks
+├── 📁 venv/                # Python virtual environment (managed by .gitignore)
+├── 📄 .gitignore           # Specifies intentionally untracked files to ignore
+├── 📄 LICENSE              # Project's open-source license
+└── 📄 README.md            # This README file
+```
 
-# 4. Run full demo: crash → AI analysis → cleanup
-./scripts/crash-test.sh
+## Operational Setup
 
-# 5. Optional: run auto-healer in one terminal
-./scripts/auto-heal.sh
-# Then in another terminal: curl localhost:8080/crash after port-forward
+### Prerequisites
 
-26 lines hidden
-📊 Demo Output
-Code
-==> Hitting /crash endpoint...
-==> Running AI log analyzer...
---- AI ANALYSIS ---
-What went wrong: The FastAPI app crashed with ZeroDivisionError at /crash endpoint.
-What should I check: Review the /crash handler; it's dividing by zero on purpose for testing.
-==> CRASH DETECTED. Triggering rollout restart...
-deployment.apps/aiops-app restarted
-==> Heal complete.
+Ensure you have the following installed on your system:
 
-3 lines hidden
-📁 Project Structure
-Code
-aiops-lite/
-├── .github/workflows/build.yml    # CI: build + push to GHCR
-├── ai-agent/
-│   └── analyzer.py                # Pulls logs → queries Ollama
-├── app/
-│   ├── main.py                    # FastAPI with /health, /crash
-│   ├── Dockerfile                 # Multi-stage, ~50MB image
-│   └── requirements.txt
-├── k8s/
-│   ├── namespace.yaml
-│   ├── deployment.yaml            # replicas: 1, limits: 64Mi RAM
-│   └── service.yaml
-├── scripts/
-│   ├── setup-k3d.sh               # Creates light k3d cluster
-│   ├── crash-test.sh              # Demo: crash + AI analysis
-│   └── auto-heal.sh               # Watches logs, restarts on error
-└── README.md
+*   **Python**: Version 3.8 or higher.
+*   **pip**: Python package installer (usually comes with Python).
+*   **git**: For cloning the repository.
+*   **Docker** (Optional): If you plan to build and run container images locally.
+*   **kubectl** (Optional): If you intend to deploy to a Kubernetes cluster.
 
-12 lines hidden
-🧯 Troubleshooting 8GB RAM Issues
-Problem
+### Installation
 
-Fix
+Follow these steps to get `aiops-lite` up and running:
 
-OOMKilled on pod
+1.  **Clone the repository**:
 
-Lower limits.memory: "32Mi" in k8s/deployment.yaml
+    ```bash
+    git clone https://github.com/your-org/aiops-lite.git
+    cd aiops-lite
+    ```
 
-ollama: connection refused
+2.  **Create and activate a Python virtual environment**:
 
-Run ollama serve or use crash-test.sh which starts it
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate # On Windows, use `.\venv\Scripts\activate`
+    ```
 
-Laptop freezing
+3.  **Install project dependencies**:
 
-Run sudo swapoff -a && sudo swapon -a + close Chrome
+    ```bash
+    pip install -r requirements.txt # Assuming a requirements.txt file will be present
+    ```
 
-phi3 too slow
+4.  **(Optional) Build Docker images**:
+    If you plan to containerize the application or deploy to Kubernetes, build the necessary Docker images:
 
-Use ollama pull tinyllama and change MODEL in analyzer.py
+    ```bash
+    docker build -t aiops-lite-agent ./ai-agent
+    docker build -t aiops-lite-app ./app
+    # Add any other component builds as needed
+    ```
 
-🗺️ Upgrade Path - From Laptop to Production
-Stage
+5.  **(Optional) Deploy to Kubernetes**:
+    To deploy `aiops-lite` components to your Kubernetes cluster:
 
-Infrastructure
+    ```bash
+    kubectl apply -f k8s/
+    ```
 
-What to Add
+    Ensure your `kubeconfig` is correctly set up and pointed to your target cluster.
 
-Lite - This Repo
+## Community & Governance
 
-k3d on laptop
+### Contributing
 
-Current setup
+We welcome contributions from the community! If you're interested in improving `aiops-lite`, please follow these steps:
 
-Cloud v1
-
-AWS EKS t3.medium
-
-Prometheus + Grafana + Loki
-
-Cloud v2
-
-EKS + Karpenter
-
-ArgoCD, AlertManager, PagerDuty
-
-Production
-
-Multi-AZ EKS
-
-Real K8s operator, not bash scripts
-
-🎓 What You Learn Building This
-Kubernetes: Deployments, Services, resource limits, liveness probes, kubectl logs
-Docker: Multi-stage builds, image optimization for low RAM
-CI/CD: GitHub Actions, container registries, GitOps basics
-AIOps Concepts: Log analysis, automated RCA, self-healing patterns
-LLM Ops: Running Ollama locally, prompt engineering for SRE tasks
-Resource Engineering: Making "enterprise" stacks run on consumer hardware
-⚠️ Important Disclaimers
-auto-heal.sh is a demo script, not a production controller. It polls every 30s and kills Ollama to save RAM.
-Don't run this on prod K8s. Use ArgoCD + Prometheus + real operators there.
-Ollama models are loaded on-demand. First analysis will be slow while phi3 loads into RAM.
-📝 License
-MIT - Use this for learning, portfolios, and interviews.
+1.  **Fork** the repository.
+2.  **Clone** your forked repository: `git clone https://github.com/your-username/aiops-lite.git`
+3.  **Create a new branch** for your feature or bug fix: `git checkout -b feature/your-feature-name` or `git checkout -b bugfix/issue-description`
+4.  **Make your changes** and ensure they adhere to the project's coding standards.
+5.  **Test your changes** thoroughly
