@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aiops-svc
+  namespace: aiops-lite
+
+spec:
+  selector:
+    app: aiops
+
+  ports:
+    - port: 80
+      targetPort: 8000
+
+  type: ClusterIP

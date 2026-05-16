@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiops-app
+  namespace: aiops-lite
+  labels:
+    app: aiops
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: aiops
+
+  template:
+    metadata:
+      labels:
+        app: aiops
+
+    spec:
+      containers:
+        - name: fastapi
+          image: ghcr.io/arshitchoubey18/aiops-lite:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8000
+
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
